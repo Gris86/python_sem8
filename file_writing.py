@@ -18,13 +18,17 @@
 from os.path import exists
 from csv import DictReader, DictWriter
 
+
 class LenNumberError(Exception):
     def __init__(self, txt):
         self.txt = txt
 
+
 class NameError(Exception):
     def __init__(self, txt):
         self.txt = txt
+
+
 def get_info():
     is_valid_first_name = False
     while not is_valid_first_name:
@@ -38,7 +42,17 @@ def get_info():
             print(err)
             continue
 
-    last_name = "Иванов"
+    is_valid_last_name = False
+    while not is_valid_last_name:
+        try:
+            last_name = input("Введите фамилию: ")
+            if len(last_name) < 2:
+                raise NameError("Неправильно введена фамилия")
+            else:
+                is_valid_last_name = True
+        except NameError as err:
+            print(err)
+            continue
 
     is_valid_phone = False
     while not is_valid_phone:
@@ -65,6 +79,16 @@ def create_file(file_name):
         f_writer.writeheader()
 
 
+def copy_data(to: str, line: int):
+    with open(file_name, "r") as data:
+        d = data.readlines()
+        fieldnames = d[0]
+        userdata = d[line]
+    with open(to, "w") as file2:
+        file2.write(fieldnames)
+        file2.write(userdata)
+
+
 def read_file(file_name):
     with open(file_name, "r", encoding='utf-8') as data:
         f_reader = DictReader(data)
@@ -75,7 +99,7 @@ def write_file(file_name, lst):
     res = read_file(file_name)
     for el in res:
         if el["Телефон"] == str(lst[2]):
-            print("Такой телофон уже есть")
+            print("Такой телефон уже есть")
             return
 
     obj = {"Имя": lst[0], "Фамилия": lst[1], "Телефон": lst[2]}
@@ -103,6 +127,16 @@ def main():
                 print("Файл отсутствует. Создайте его")
                 continue
             print(*read_file(file_name))
+        elif command == 'c':
+            to = input("Введите название нового файла: ")
+            line = int(input(f"Введите номер человека в списке (всего в списке {len(read_file(file_name))}): "))
+            if line == 0:
+                print("Нумерация идёт с единицы.")
+                continue
+            if line > len(read_file(file_name)):
+                print("Нет в списке человека с таким номером.")
+                continue
+            copy_data(to, line)
 
 
 main()
